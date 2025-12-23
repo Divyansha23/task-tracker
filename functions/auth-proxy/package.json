@@ -1,9 +1,0 @@
-{
-  "name": "auth-proxy",
-  "version": "1.0.0",
-  "description": "Authentication proxy function for Appwrite",
-  "main": "index.js",
-  "dependencies": {
-    "node-appwrite": "^13.0.0"
-  }
-}

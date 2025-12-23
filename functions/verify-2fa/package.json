@@ -1,8 +1,0 @@
-{
-  "name": "verify-2fa",
-  "version": "1.0.0",
-  "main": "index.js",
-  "dependencies": {
-    "node-appwrite": "^8.0.0"
-  }
-}
