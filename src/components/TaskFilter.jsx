@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useUserResolver } from "../hooks/useUserResolver";
+import { useTheme } from "../lib/context/theme";
 
 export function TaskFilter({ tasks, onFilteredTasks, users = [] }) {
   const [searchTerm, setSearchTerm] = useState("");
@@ -8,6 +9,7 @@ export function TaskFilter({ tasks, onFilteredTasks, users = [] }) {
   const [userFilter, setUserFilter] = useState("all");
   const [dueDateFilter, setDueDateFilter] = useState("all");
   const { resolveUser } = useUserResolver();
+  const { theme } = useTheme();
 
   // Apply all filters whenever any filter changes
   useEffect(() => {
@@ -90,12 +92,12 @@ export function TaskFilter({ tasks, onFilteredTasks, users = [] }) {
 
   return (
     <div style={{
-      backgroundColor: "white",
+      backgroundColor: theme.bgCard,
       padding: "1.5rem",
       borderRadius: "12px",
       marginBottom: "1.5rem",
-      boxShadow: "0 2px 4px -1px rgba(0, 0, 0, 0.1)",
-      border: "1px solid #e5e7eb"
+      boxShadow: theme.shadow,
+      border: `1px solid ${theme.border}`
     }}>
       <div style={{
         display: "flex",
@@ -107,7 +109,7 @@ export function TaskFilter({ tasks, onFilteredTasks, users = [] }) {
           margin: 0,
           fontSize: "1.1rem",
           fontWeight: "600",
-          color: "#1e293b"
+          color: theme.text
         }}>
           🔍 Filter & Search Tasks
         </h3>
@@ -116,9 +118,9 @@ export function TaskFilter({ tasks, onFilteredTasks, users = [] }) {
             onClick={clearAllFilters}
             style={{
               padding: "0.5rem 1rem",
-              backgroundColor: "#f1f5f9",
-              color: "#475569",
-              border: "1px solid #cbd5e1",
+              backgroundColor: theme.bgMuted,
+              color: theme.textSecondary,
+              border: `1px solid ${theme.border}`,
               borderRadius: "6px",
               fontSize: "0.85rem",
               cursor: "pointer",
@@ -142,10 +144,12 @@ export function TaskFilter({ tasks, onFilteredTasks, users = [] }) {
           style={{
             width: "100%",
             padding: "0.75rem",
-            border: "1px solid #d1d5db",
+            border: `1px solid ${theme.border}`,
             borderRadius: "8px",
             fontSize: "1rem",
-            boxSizing: "border-box"
+            boxSizing: "border-box",
+            backgroundColor: theme.bgInput,
+            color: theme.text
           }}
         />
       </div>
@@ -163,7 +167,7 @@ export function TaskFilter({ tasks, onFilteredTasks, users = [] }) {
             marginBottom: "0.5rem",
             fontSize: "0.9rem",
             fontWeight: "500",
-            color: "#374151"
+            color: theme.textSecondary
           }}>
             Status
           </label>
@@ -173,10 +177,11 @@ export function TaskFilter({ tasks, onFilteredTasks, users = [] }) {
             style={{
               width: "100%",
               padding: "0.5rem",
-              border: "1px solid #d1d5db",
+              border: `1px solid ${theme.border}`,
               borderRadius: "6px",
               fontSize: "0.9rem",
-              backgroundColor: statusFilter !== "all" ? "#eff6ff" : "white"
+              backgroundColor: statusFilter !== "all" ? theme.primary + "20" : theme.bgInput,
+              color: theme.text
             }}
           >
             <option value="all">All Statuses</option>
@@ -194,7 +199,7 @@ export function TaskFilter({ tasks, onFilteredTasks, users = [] }) {
             marginBottom: "0.5rem",
             fontSize: "0.9rem",
             fontWeight: "500",
-            color: "#374151"
+            color: theme.textSecondary
           }}>
             Priority
           </label>
@@ -204,10 +209,11 @@ export function TaskFilter({ tasks, onFilteredTasks, users = [] }) {
             style={{
               width: "100%",
               padding: "0.5rem",
-              border: "1px solid #d1d5db",
+              border: `1px solid ${theme.border}`,
               borderRadius: "6px",
               fontSize: "0.9rem",
-              backgroundColor: priorityFilter !== "all" ? "#eff6ff" : "white"
+              backgroundColor: priorityFilter !== "all" ? theme.primary + "20" : theme.bgInput,
+              color: theme.text
             }}
           >
             <option value="all">All Priorities</option>
@@ -226,7 +232,7 @@ export function TaskFilter({ tasks, onFilteredTasks, users = [] }) {
             marginBottom: "0.5rem",
             fontSize: "0.9rem",
             fontWeight: "500",
-            color: "#374151"
+            color: theme.textSecondary
           }}>
             Assigned To
           </label>
@@ -236,10 +242,11 @@ export function TaskFilter({ tasks, onFilteredTasks, users = [] }) {
             style={{
               width: "100%",
               padding: "0.5rem",
-              border: "1px solid #d1d5db",
+              border: `1px solid ${theme.border}`,
               borderRadius: "6px",
               fontSize: "0.9rem",
-              backgroundColor: userFilter !== "all" ? "#eff6ff" : "white"
+              backgroundColor: userFilter !== "all" ? theme.primary + "20" : theme.bgInput,
+              color: theme.text
             }}
           >
             <option value="all">All Users</option>
@@ -259,7 +266,7 @@ export function TaskFilter({ tasks, onFilteredTasks, users = [] }) {
             marginBottom: "0.5rem",
             fontSize: "0.9rem",
             fontWeight: "500",
-            color: "#374151"
+            color: theme.textSecondary
           }}>
             Due Date
           </label>
@@ -269,10 +276,11 @@ export function TaskFilter({ tasks, onFilteredTasks, users = [] }) {
             style={{
               width: "100%",
               padding: "0.5rem",
-              border: "1px solid #d1d5db",
+              border: `1px solid ${theme.border}`,
               borderRadius: "6px",
               fontSize: "0.9rem",
-              backgroundColor: dueDateFilter !== "all" ? "#eff6ff" : "white"
+              backgroundColor: dueDateFilter !== "all" ? theme.primary + "20" : theme.bgInput,
+              color: theme.text
             }}
           >
             <option value="all">All Dates</option>
@@ -296,9 +304,9 @@ export function TaskFilter({ tasks, onFilteredTasks, users = [] }) {
           onClick={() => setStatusFilter("pending")}
           style={{
             padding: "0.4rem 0.8rem",
-            backgroundColor: statusFilter === "pending" ? "#f59e0b" : "#f8fafc",
-            color: statusFilter === "pending" ? "white" : "#64748b",
-            border: "1px solid #e2e8f0",
+            backgroundColor: statusFilter === "pending" ? "#f59e0b" : theme.bgMuted,
+            color: statusFilter === "pending" ? "white" : theme.textSecondary,
+            border: `1px solid ${theme.border}`,
             borderRadius: "20px",
             fontSize: "0.8rem",
             cursor: "pointer",
@@ -311,9 +319,9 @@ export function TaskFilter({ tasks, onFilteredTasks, users = [] }) {
           onClick={() => setDueDateFilter("overdue")}
           style={{
             padding: "0.4rem 0.8rem",
-            backgroundColor: dueDateFilter === "overdue" ? "#ef4444" : "#f8fafc",
-            color: dueDateFilter === "overdue" ? "white" : "#64748b",
-            border: "1px solid #e2e8f0",
+            backgroundColor: dueDateFilter === "overdue" ? "#ef4444" : theme.bgMuted,
+            color: dueDateFilter === "overdue" ? "white" : theme.textSecondary,
+            border: `1px solid ${theme.border}`,
             borderRadius: "20px",
             fontSize: "0.8rem",
             cursor: "pointer",
@@ -326,9 +334,9 @@ export function TaskFilter({ tasks, onFilteredTasks, users = [] }) {
           onClick={() => setPriorityFilter("5")}
           style={{
             padding: "0.4rem 0.8rem",
-            backgroundColor: priorityFilter === "5" ? "#dc2626" : "#f8fafc",
-            color: priorityFilter === "5" ? "white" : "#64748b",
-            border: "1px solid #e2e8f0",
+            backgroundColor: priorityFilter === "5" ? "#dc2626" : theme.bgMuted,
+            color: priorityFilter === "5" ? "white" : theme.textSecondary,
+            border: `1px solid ${theme.border}`,
             borderRadius: "20px",
             fontSize: "0.8rem",
             cursor: "pointer",
@@ -341,9 +349,9 @@ export function TaskFilter({ tasks, onFilteredTasks, users = [] }) {
           onClick={() => setUserFilter("")}
           style={{
             padding: "0.4rem 0.8rem",
-            backgroundColor: userFilter === "" ? "#6b7280" : "#f8fafc",
-            color: userFilter === "" ? "white" : "#64748b",
-            border: "1px solid #e2e8f0",
+            backgroundColor: userFilter === "" ? "#6b7280" : theme.bgMuted,
+            color: userFilter === "" ? "white" : theme.textSecondary,
+            border: `1px solid ${theme.border}`,
             borderRadius: "20px",
             fontSize: "0.8rem",
             cursor: "pointer",
@@ -356,9 +364,9 @@ export function TaskFilter({ tasks, onFilteredTasks, users = [] }) {
           onClick={() => setDueDateFilter("this-week")}
           style={{
             padding: "0.4rem 0.8rem",
-            backgroundColor: dueDateFilter === "this-week" ? "#8b5cf6" : "#f8fafc",
-            color: dueDateFilter === "this-week" ? "white" : "#64748b",
-            border: "1px solid #e2e8f0",
+            backgroundColor: dueDateFilter === "this-week" ? "#8b5cf6" : theme.bgMuted,
+            color: dueDateFilter === "this-week" ? "white" : theme.textSecondary,
+            border: `1px solid ${theme.border}`,
             borderRadius: "20px",
             fontSize: "0.8rem",
             cursor: "pointer",

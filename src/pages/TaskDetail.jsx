@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useUser } from "../lib/context/user";
 import { useTask } from "../lib/context/tasks";
+import { useTheme } from "../lib/context/theme";
 import { useUserResolver } from "../hooks/useUserResolver";
 import { databases, DATABASE_ID, TASKS_COLLECTION_ID } from "../lib/appwrite";
+import { TaskActivityLog } from "../components/TaskActivityLog";
 
 export function TaskDetail({ taskId }) {
   const [task, setTask] = useState(null);
@@ -13,6 +15,7 @@ export function TaskDetail({ taskId }) {
   const [hasChanges, setHasChanges] = useState(false);
   const user = useUser();
   const { update } = useTask();
+  const { theme } = useTheme();
   const { resolveUser, getUserEmail } = useUserResolver();
 
   useEffect(() => {
@@ -521,6 +524,9 @@ export function TaskDetail({ taskId }) {
           </div>
         )}
       </div>
+
+      {/* Activity Log */}
+      <TaskActivityLog task={task} />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useTask } from "../lib/context/tasks";
 import { useUser } from "../lib/context/user";
+import { useTheme } from "../lib/context/theme";
 import { useUserResolver } from "../hooks/useUserResolver";
 import TaskForm from "./TaskFormClean";
 import { TaskNotificationSummary } from "../components/TaskNotificationSummary";
@@ -14,22 +15,8 @@ export function Dashboard() {
   const [loadingTasks, setLoadingTasks] = useState(true);
   const { getAllTasks, add } = useTask();
   const user = useUser();
+  const { theme } = useTheme();
   const { resolveUser, getUserEmail } = useUserResolver();
-
-  // Debug user state
-  console.log("🔍 Dashboard: User state:", {
-    current: user.current,
-    isLoading: user.isLoading,
-    email: user.current?.email
-  });
-  
-  console.log("🔍 Dashboard: Component state:", {
-    users: users.length,
-    allTasks: allTasks.length,
-    loadingUsers,
-    loadingTasks,
-    activeTab
-  });
 
   // Check if user is logged in
   if (!user.current && !user.isLoading) {
@@ -39,23 +26,23 @@ export function Dashboard() {
         margin: "2rem auto", 
         padding: "2rem",
         textAlign: "center",
-        backgroundColor: "white",
+        backgroundColor: theme.bgCard,
         borderRadius: "12px",
-        boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)"
+        boxShadow: theme.shadow
       }}>
         <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>🔒</div>
-        <h2 style={{ color: "#1e293b", marginBottom: "1rem" }}>Access Restricted</h2>
-        <p style={{ color: "#64748b", marginBottom: "2rem" }}>
+        <h2 style={{ color: theme.text, marginBottom: "1rem" }}>Access Restricted</h2>
+        <p style={{ color: theme.textSecondary, marginBottom: "2rem" }}>
           You need to be logged in to view the dashboard.
         </p>
         <button
           onClick={() => {
             window.history.pushState({}, '', '/login');
-            window.location.reload();
+            window.dispatchEvent(new PopStateEvent('popstate'));
           }}
           style={{
             padding: "12px 24px",
-            backgroundColor: "#3b82f6",
+            backgroundColor: theme.primary,
             color: "white",
             border: "none",
             borderRadius: "8px",
@@ -79,13 +66,13 @@ export function Dashboard() {
         margin: "2rem auto", 
         padding: "2rem",
         textAlign: "center",
-        backgroundColor: "white",
+        backgroundColor: theme.bgCard,
         borderRadius: "12px",
-        boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)"
+        boxShadow: theme.shadow
       }}>
         <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>⏳</div>
-        <h2 style={{ color: "#1e293b", marginBottom: "1rem" }}>Loading...</h2>
-        <p style={{ color: "#64748b" }}>
+        <h2 style={{ color: theme.text, marginBottom: "1rem" }}>Loading...</h2>
+        <p style={{ color: theme.textSecondary }}>
           Checking authentication status...
         </p>
       </div>
@@ -241,8 +228,8 @@ export function Dashboard() {
 
   const tabStyle = (isActive) => ({
     padding: "12px 24px",
-    backgroundColor: isActive ? "#3b82f6" : "#f8fafc",
-    color: isActive ? "white" : "#64748b",
+    backgroundColor: isActive ? theme.primary : theme.bgMuted,
+    color: isActive ? "white" : theme.textSecondary,
     border: "none",
     borderRadius: "8px",
     fontSize: "1rem",
@@ -291,66 +278,25 @@ export function Dashboard() {
       {/* Header */}
       <div style={{ 
         display: "flex", 
-        justifyContent: "space-between", 
+        justifyContent: "center", 
         alignItems: "center", 
-        marginBottom: "3rem" 
+        marginBottom: "2rem" 
       }}>
-        <div style={{ textAlign: "center", flex: 1 }}>
+        <div style={{ textAlign: "center" }}>
           <h1 style={{
-            fontSize: "2.5rem",
+            fontSize: "2.2rem",
             fontWeight: "700",
-            color: "#1e293b",
-            marginBottom: "0.5rem"
+            color: theme.text,
+            marginBottom: "0.25rem"
           }}>
             📊 Dashboard
           </h1>
           <p style={{
-            color: "#64748b",
-            fontSize: "1.1rem"
+            color: theme.textSecondary,
+            fontSize: "1rem"
           }}>
-            Overview of users and tasks in your system
+            Overview of users and tasks
           </p>
-        </div>
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "end" }}>
-          <span style={{
-            color: "#64748b",
-            fontSize: "0.9rem",
-            marginBottom: "0.5rem"
-          }}>
-            {user.current?.email}
-          </span>
-          <button 
-            type="button" 
-            onClick={async () => {
-              try {
-                await user.logout();
-                console.log("Logout completed, redirecting to login...");
-                // Navigate to login page
-                window.history.pushState({}, '', '/login');
-                // Trigger a popstate event to make React re-render
-                window.dispatchEvent(new PopStateEvent('popstate'));
-              } catch (err) {
-                console.error("Logout failed:", err);
-                // Force redirect even if logout fails
-                window.location.href = '/login';
-              }
-            }}
-            style={{ 
-              padding: "10px 20px",
-              backgroundColor: "#ef4444",
-              color: "white",
-              border: "none",
-              borderRadius: "8px",
-              cursor: "pointer",
-              fontSize: "14px",
-              fontWeight: "600",
-              transition: "background-color 0.2s"
-            }}
-            onMouseOver={(e) => e.target.style.backgroundColor = "#dc2626"}
-            onMouseOut={(e) => e.target.style.backgroundColor = "#ef4444"}
-          >
-            🚪 Logout
-          </button>
         </div>
       </div>
 
@@ -405,7 +351,6 @@ export function Dashboard() {
         </button>
         <button 
           onClick={() => {
-            console.log("🔄 Manual refresh of all data...");
             fetchUsers();
             fetchAllTasks();
           }}
@@ -422,88 +367,16 @@ export function Dashboard() {
         >
           🔄 Refresh All
         </button>
-        <button 
-          onClick={async () => {
-            // Create test tasks with different due dates for notifications
-            const today = new Date();
-            const tomorrow = new Date(today);
-            tomorrow.setDate(tomorrow.getDate() + 1);
-            const yesterday = new Date(today);
-            yesterday.setDate(yesterday.getDate() - 1);
-            const nextWeek = new Date(today);
-            nextWeek.setDate(nextWeek.getDate() + 5);
-
-            const testTasks = [
-              {
-                title: "Overdue Task - Review Report",
-                description: "This task is overdue and should show up in notifications",
-                status: "pending",
-                priority: 4,
-                dueDate: yesterday.toISOString(),
-                creationDate: new Date().toISOString(),
-                AssignedTo: user.current?.$id || ""
-              },
-              {
-                title: "Due Today - Submit Proposal",
-                description: "This task is due today",
-                status: "in-progress",
-                priority: 5,
-                dueDate: today.toISOString(),
-                creationDate: new Date().toISOString(),
-                AssignedTo: user.current?.$id || ""
-              },
-              {
-                title: "Due Tomorrow - Team Meeting",
-                description: "This task is due tomorrow",
-                status: "pending",
-                priority: 3,
-                dueDate: tomorrow.toISOString(),
-                creationDate: new Date().toISOString(),
-                AssignedTo: user.current?.$id || ""
-              },
-              {
-                title: "Due Next Week - Project Planning",
-                description: "This task is due in a few days",
-                status: "pending",
-                priority: 2,
-                dueDate: nextWeek.toISOString(),
-                creationDate: new Date().toISOString(),
-                AssignedTo: user.current?.$id || ""
-              }
-            ];
-
-            console.log("Creating test tasks with notifications...");
-            for (const task of testTasks) {
-              await add(task);
-            }
-            
-            // Refresh data
-            fetchAllTasks();
-          }}
-          style={{
-            padding: "12px 24px",
-            backgroundColor: "#f59e0b",
-            color: "white",
-            border: "none",
-            borderRadius: "8px",
-            fontSize: "1rem",
-            fontWeight: "600",
-            cursor: "pointer",
-            marginLeft: "1rem"
-          }}
-        >
-          🔔 Create Test Tasks (with Notifications)
-        </button>
       </div>
 
       {/* Users Tab */}
       {activeTab === "users" && (
         <div style={{
-          backgroundColor: "white",
+          backgroundColor: theme.bgCard,
           borderRadius: "12px",
           padding: "2rem",
-          boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
-          border: "1px solid #e2e8f0"
+          boxShadow: theme.shadow,
+          border: `1px solid ${theme.border}`
         }}>
           <div style={{ 
             display: "flex", 
@@ -514,7 +387,7 @@ export function Dashboard() {
             <h2 style={{ 
               fontSize: "1.5rem", 
               fontWeight: "600", 
-              color: "#1e293b",
+              color: theme.text,
               margin: 0
             }}>
               👥 User Overview
@@ -525,9 +398,9 @@ export function Dashboard() {
               style={{
                 padding: "8px 16px",
                 fontSize: "0.9rem",
-                backgroundColor: loadingUsers ? "#e5e7eb" : "#f1f5f9",
-                color: loadingUsers ? "#9ca3af" : "#475569",
-                border: "1px solid #d1d5db",
+                backgroundColor: loadingUsers ? theme.bgMuted : theme.bgMuted,
+                color: loadingUsers ? theme.textMuted : theme.textSecondary,
+                border: `1px solid ${theme.border}`,
                 borderRadius: "6px",
                 cursor: loadingUsers ? "not-allowed" : "pointer",
                 transition: "background-color 0.2s"
@@ -538,11 +411,11 @@ export function Dashboard() {
           </div>
 
           {loadingUsers ? (
-            <div style={{ textAlign: "center", padding: "3rem", color: "#64748b" }}>
+            <div style={{ textAlign: "center", padding: "3rem", color: theme.textSecondary }}>
               Loading users...
             </div>
           ) : users.length === 0 ? (
-            <div style={{ textAlign: "center", padding: "3rem", color: "#64748b" }}>
+            <div style={{ textAlign: "center", padding: "3rem", color: theme.textSecondary }}>
               No users found
             </div>
           ) : (
@@ -554,19 +427,19 @@ export function Dashboard() {
                     key={u.$id}
                     style={{
                       padding: "1.5rem",
-                      border: "1px solid #e5e7eb",
+                      border: `1px solid ${theme.border}`,
                       borderRadius: "8px",
-                      backgroundColor: "#fafafa",
+                      backgroundColor: theme.bgMuted,
                       transition: "all 0.2s",
                       cursor: "pointer"
                     }}
                     onMouseOver={(e) => {
-                      e.currentTarget.style.backgroundColor = "#f1f5f9";
-                      e.currentTarget.style.borderColor = "#3b82f6";
+                      e.currentTarget.style.backgroundColor = theme.bgCardHover;
+                      e.currentTarget.style.borderColor = theme.primary;
                     }}
                     onMouseOut={(e) => {
-                      e.currentTarget.style.backgroundColor = "#fafafa";
-                      e.currentTarget.style.borderColor = "#e5e7eb";
+                      e.currentTarget.style.backgroundColor = theme.bgMuted;
+                      e.currentTarget.style.borderColor = theme.border;
                     }}
                   >
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -574,13 +447,13 @@ export function Dashboard() {
                         <h3 style={{ 
                           fontSize: "1.1rem", 
                           fontWeight: "600", 
-                          color: "#1e293b",
+                          color: theme.text,
                           margin: "0 0 0.5rem 0"
                         }}>
                           👤 {u.email}
                         </h3>
                         <p style={{ 
-                          color: "#64748b", 
+                          color: theme.textSecondary, 
                           fontSize: "0.9rem",
                           margin: 0
                         }}>
@@ -591,14 +464,14 @@ export function Dashboard() {
                         <div style={{ 
                           fontSize: "1.5rem", 
                           fontWeight: "700", 
-                          color: "#3b82f6",
+                          color: theme.primary,
                           marginBottom: "0.5rem"
                         }}>
                           {taskCount.total}
                         </div>
                         <div style={{ 
                           fontSize: "0.8rem", 
-                          color: "#64748b"
+                          color: theme.textSecondary
                         }}>
                           Total Tasks
                         </div>
@@ -673,11 +546,11 @@ export function Dashboard() {
       {/* Tasks Tab */}
       {activeTab === "tasks" && (
         <div style={{
-          backgroundColor: "white",
+          backgroundColor: theme.bgCard,
           borderRadius: "12px",
           padding: "2rem",
-          boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
-          border: "1px solid #e2e8f0"
+          boxShadow: theme.shadow,
+          border: `1px solid ${theme.border}`
         }}>
           <div style={{ 
             display: "flex", 
@@ -688,7 +561,7 @@ export function Dashboard() {
             <h2 style={{ 
               fontSize: "1.5rem", 
               fontWeight: "600", 
-              color: "#1e293b",
+              color: theme.text,
               margin: 0
             }}>
               📋 Task Overview
@@ -699,9 +572,9 @@ export function Dashboard() {
               style={{
                 padding: "8px 16px",
                 fontSize: "0.9rem",
-                backgroundColor: loadingTasks ? "#e5e7eb" : "#f1f5f9",
-                color: loadingTasks ? "#9ca3af" : "#475569",
-                border: "1px solid #d1d5db",
+                backgroundColor: loadingTasks ? theme.bgMuted : theme.bgMuted,
+                color: loadingTasks ? theme.textMuted : theme.textSecondary,
+                border: `1px solid ${theme.border}`,
                 borderRadius: "6px",
                 cursor: loadingTasks ? "not-allowed" : "pointer",
                 transition: "background-color 0.2s"
@@ -720,16 +593,16 @@ export function Dashboard() {
           }}>
             <div style={{
               padding: "1.5rem",
-              backgroundColor: "#f8fafc",
+              backgroundColor: theme.bgMuted,
               borderRadius: "8px",
               textAlign: "center",
-              border: "1px solid #e2e8f0"
+              border: `1px solid ${theme.border}`
             }}>
               <div style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>📊</div>
-              <div style={{ fontSize: "1.5rem", fontWeight: "700", color: "#1e293b" }}>
+              <div style={{ fontSize: "1.5rem", fontWeight: "700", color: theme.text }}>
                 {taskStats.total}
               </div>
-              <div style={{ fontSize: "0.9rem", color: "#64748b" }}>Total Tasks</div>
+              <div style={{ fontSize: "0.9rem", color: theme.textSecondary }}>Total Tasks</div>
             </div>
 
             <div style={{
@@ -777,20 +650,20 @@ export function Dashboard() {
 
           {/* Task List */}
           {loadingTasks ? (
-            <div style={{ textAlign: "center", padding: "3rem", color: "#64748b" }}>
+            <div style={{ textAlign: "center", padding: "3rem", color: theme.textSecondary }}>
               Loading tasks...
             </div>
           ) : allTasks.length === 0 ? (
             <div style={{ 
               textAlign: "center", 
               padding: "3rem", 
-              color: "#64748b",
-              backgroundColor: "#f8fafc",
+              color: theme.textSecondary,
+              backgroundColor: theme.bgMuted,
               borderRadius: "8px",
-              border: "1px solid #e2e8f0"
+              border: `1px solid ${theme.border}`
             }}>
               <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>📝</div>
-              <h3 style={{ fontSize: "1.2rem", fontWeight: "600", marginBottom: "0.5rem" }}>
+              <h3 style={{ fontSize: "1.2rem", fontWeight: "600", marginBottom: "0.5rem", color: theme.text }}>
                 No tasks yet
               </h3>
               <p>Create your first task to get started!</p>
@@ -805,24 +678,23 @@ export function Dashboard() {
                   key={task.$id}
                   style={{
                     padding: "1.5rem",
-                    border: "1px solid #e5e7eb",
+                    border: `1px solid ${theme.border}`,
                     borderRadius: "8px",
-                    backgroundColor: "#fafafa",
+                    backgroundColor: theme.bgMuted,
                     transition: "all 0.2s",
                     cursor: "pointer"
                   }}
                   onClick={() => {
                     window.history.pushState({}, '', `/task/${task.$id}`);
-                    // Trigger a popstate event to make React re-render
                     window.dispatchEvent(new PopStateEvent('popstate'));
                   }}
                   onMouseOver={(e) => {
-                    e.currentTarget.style.backgroundColor = "#f1f5f9";
-                    e.currentTarget.style.borderColor = "#3b82f6";
+                    e.currentTarget.style.backgroundColor = theme.bgCardHover;
+                    e.currentTarget.style.borderColor = theme.primary;
                   }}
                   onMouseOut={(e) => {
-                    e.currentTarget.style.backgroundColor = "#fafafa";
-                    e.currentTarget.style.borderColor = "#e5e7eb";
+                    e.currentTarget.style.backgroundColor = theme.bgMuted;
+                    e.currentTarget.style.borderColor = theme.border;
                   }}
                 >
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start" }}>
@@ -830,14 +702,14 @@ export function Dashboard() {
                       <h3 style={{ 
                         fontSize: "1.1rem", 
                         fontWeight: "600", 
-                        color: "#1e293b",
+                        color: theme.text,
                         margin: "0 0 0.5rem 0"
                       }}>
                         {task.title}
                       </h3>
                       {task.description && (
                         <p style={{ 
-                          color: "#64748b", 
+                          color: theme.textSecondary, 
                           fontSize: "0.9rem",
                           margin: "0 0 1rem 0",
                           lineHeight: "1.4"
@@ -857,16 +729,16 @@ export function Dashboard() {
                         }}>
                           {getStatusIcon(task.status)} {task.status.charAt(0).toUpperCase() + task.status.slice(1)}
                         </span>
-                        <span style={{ color: "#64748b" }}>
+                        <span style={{ color: theme.textSecondary }}>
                           Priority: {task.priority}
                         </span>
                         {task.AssignedTo && (
-                          <span style={{ color: "#64748b" }}>
+                          <span style={{ color: theme.textSecondary }}>
                             👤 {resolveUser(task.AssignedTo)}
                           </span>
                         )}
                         {task.dueDate && (
-                          <span style={{ color: "#64748b" }}>
+                          <span style={{ color: theme.textSecondary }}>
                             📅 {new Date(task.dueDate).toLocaleDateString()}
                           </span>
                         )}
@@ -879,7 +751,7 @@ export function Dashboard() {
                 <div style={{ 
                   textAlign: "center", 
                   padding: "1rem", 
-                  color: "#64748b" 
+                  color: theme.textSecondary 
                 }}>
                   ... and {allTasks.length - 10} more tasks
                 </div>
@@ -892,16 +764,16 @@ export function Dashboard() {
       {/* Create Task Tab */}
       {activeTab === "create" && (
         <div style={{
-          backgroundColor: "white",
+          backgroundColor: theme.bgCard,
           borderRadius: "12px",
           padding: "2rem",
-          boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
-          border: "1px solid #e2e8f0"
+          boxShadow: theme.shadow,
+          border: `1px solid ${theme.border}`
         }}>
           <h2 style={{ 
             fontSize: "1.5rem", 
             fontWeight: "600", 
-            color: "#1e293b",
+            color: theme.text,
             marginBottom: "2rem"
           }}>
             ➕ Create New Task
